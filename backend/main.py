@@ -2,6 +2,8 @@
 from fastapi import FastAPI, HTTPException
 from datetime import date
 
+from monthly_service import get_monthly_analysis
+
 from elexon_service import get_actual_wind, get_wind_forecasts
 
 from datetime import timedelta
@@ -118,4 +120,17 @@ def wind_analysis(date: date):
         raise HTTPException(
             status_code=502,
             detail="Unable to calculate wind forecast accuracy"
+        ) from error
+
+
+
+@app.get("/api/wind/monthly")
+def monthly_wind_analysis():
+    try:
+        return get_monthly_analysis(2026, 1)
+
+    except Exception as error:
+        raise HTTPException(
+            status_code=502,
+            detail="Unable to calculate monthly wind analysis"
         ) from error

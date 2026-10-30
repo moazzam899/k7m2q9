@@ -10,6 +10,9 @@ from datetime import timedelta
 
 from fastapi.middleware.cors import CORSMiddleware
 
+import json
+from pathlib import Path
+
 from analysis import (
     convert_actual_to_hourly,
     select_day_ahead_forecasts,
@@ -140,13 +143,21 @@ def wind_analysis(date: date):
 
 
 
-@app.get("/api/wind/monthly")
-def monthly_wind_analysis():
-    try:
-        return get_monthly_analysis(2026, 1)
 
-    except Exception as error:
+@app.get("/api/wind/monthly")
+def monthly_analysis():
+    snapshot_path = (
+        Path(__file__).resolve().parent
+        / "data"
+        / "january_2026.json"
+    )
+
+    if not snapshot_path.is_file():
         raise HTTPException(
-            status_code=502,
-            detail="Unable to calculate monthly wind analysis"
-        ) from error
+            status_code=503,
+            detail="Monthly analysis snapshot is unavailable",
+        )
+
+    with snapshot_path.open("r", encoding="utf-8") as file:
+        return json.load(file)
+

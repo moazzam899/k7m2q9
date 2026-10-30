@@ -26,6 +26,11 @@ import {
 } from "recharts";
 
 
+import {
+  AlertTriangle,
+  Lightbulb,
+  ShieldCheck,
+} from "lucide-react";
 
 
 function App() {
@@ -111,6 +116,19 @@ const selectedDay = monthlyData?.daily_results?.find(
   (day) => day.date === selectedDate
 );
 
+
+const dailyMae = selectedDay?.mae;
+
+const dailyRisk =
+  dailyMae == null
+    ? { label: "Loading", className: "risk-loading" }
+    : dailyMae > 2500
+      ? { label: "High Error", className: "risk-high" }
+      : dailyMae >= 1000
+        ? { label: "Moderate Error", className: "risk-moderate" }
+        : { label: "Low Error", className: "risk-low" };
+
+
 const hourlyChartData = (selectedDay?.comparisons ?? []).map((item) => ({
   hour: item.hour.slice(11, 16),
   actual: item.actual_mw,
@@ -119,12 +137,43 @@ const hourlyChartData = (selectedDay?.comparisons ?? []).map((item) => ({
 
 
 
+const bias = monthlyData?.metrics?.bias;
+
+const businessInsights = [
+  {
+    icon: AlertTriangle,
+    title: "Systematic Forecast Bias",
+    description:
+      bias == null
+        ? "Waiting for forecast accuracy data."
+        : bias > 0
+          ? `Wind generation was over-forecast by an average of ${bias.toLocaleString()} MW. This may increase shortfall exposure when purchasing decisions rely on these forecasts.`
+          : bias < 0
+            ? `Wind generation was under-forecast by an average of ${Math.abs(bias).toLocaleString()} MW. This may lead to more energy being purchased than required.`
+            : "No overall directional forecast bias was detected.",
+  },
+  {
+    icon: Lightbulb,
+    title: "Purchasing Recommendation",
+    description:
+      "Consider adjusting day-ahead purchasing decisions for historical forecast bias, while monitoring weather conditions and forecast uncertainty.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Risk Management",
+    description:
+      "Track daily forecast errors and unusually large deviations to support contingency planning and reduce potential balancing exposure.",
+  },
+];
+
+
+
   return (
     <div className="app">
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-icon">
-            <Wind size={25} />
+          <img src="/windsight.svg" alt="WindSight logo" />
           </div>
           <div>
             <h2>WindSight</h2>
@@ -239,6 +288,10 @@ const hourlyChartData = (selectedDay?.comparisons ?? []).map((item) => ({
       </option>
     ))}
   </select>
+
+  <span className={`risk-badge ${dailyRisk.className}`}>
+  {dailyRisk.label}
+</span>
 
   <span className="section-tag">MW</span>
 </div>
@@ -359,6 +412,36 @@ const hourlyChartData = (selectedDay?.comparisons ?? []).map((item) => ({
 </div>
 
           </section>
+
+
+<section className="insights-section">
+  <div className="section-heading">
+    <div>
+      <h3>Business Insights</h3>
+      <p>
+        What forecast accuracy means for energy purchasing decisions
+      </p>
+    </div>
+  </div>
+
+  <div className="insights-grid">
+    {businessInsights.map((insight) => {
+      const Icon = insight.icon;
+
+      return (
+        <div className="insight-card" key={insight.title}>
+          <div className="insight-icon">
+            <Icon size={21} />
+          </div>
+
+          <h4>{insight.title}</h4>
+          <p>{insight.description}</p>
+        </div>
+      );
+    })}
+  </div>
+</section>
+
 
           <footer className="footer">
             WindSight · Powered by Elexon BMRS · January 2026

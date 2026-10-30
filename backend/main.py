@@ -8,6 +8,8 @@ from elexon_service import get_actual_wind, get_wind_forecasts
 
 from datetime import timedelta
 
+from fastapi.middleware.cors import CORSMiddleware
+
 from analysis import (
     convert_actual_to_hourly,
     select_day_ahead_forecasts,
@@ -19,6 +21,20 @@ app = FastAPI(
     description="UK Wind Power Forecast Intelligence",
     version="1.0.0"
 )
+
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=False,
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
+
 
 
 @app.get("/")

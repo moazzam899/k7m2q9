@@ -46,8 +46,8 @@ useEffect(() => {
   async function fetchMonthlyData() {
     try {
       const response = await fetch(
-        "http://localhost:8000/api/wind/monthly"
-      );
+  `${import.meta.env.VITE_API_URL || "http://localhost:8000"}/api/wind/monthly`
+);
 
       if (!response.ok) {
         throw new Error("Failed to fetch monthly analysis");
